@@ -1,4 +1,4 @@
-import type { PenPreset, Settings, TabletPreset } from '../types/drawing';
+import type { PenPreset, Settings, TabletPreset, PaperSize } from '../types/drawing';
 
 export interface TabletPresetInfo {
     id: TabletPreset;
@@ -126,10 +126,39 @@ export const DEFAULT_PEN_PRESETS: PenPreset[] = [
     },
 ];
 
+export interface PaperPresetInfo {
+    id: PaperSize;
+    name: string;
+    sheetWidthMm: number;
+    sheetHeightMm: number;
+    aspectRatio: string;
+    description: string;
+}
+
+export const PAPER_PRESETS: Record<PaperSize, PaperPresetInfo> = {
+    A4: {
+        id: 'A4',
+        name: 'A4 横',
+        sheetWidthMm: 29700,
+        sheetHeightMm: 21000,
+        aspectRatio: '297:210',
+        description: '標準用紙 (29.7m × 21.0m / 縮尺1:100)',
+    },
+    A3: {
+        id: 'A3',
+        name: 'A3 横',
+        sheetWidthMm: 42000,
+        sheetHeightMm: 29700,
+        aspectRatio: '420:297',
+        description: '大型用紙 (42.0m × 29.7m / 縮尺1:100)',
+    },
+};
+
 export const DEFAULT_SETTINGS: Settings = {
     tabletPreset: 'fullscreen',
-    canvasWidthMm: 21840, // 24 grid units of 910mm = ~21.8m
-    canvasHeightMm: 16380, // 18 grid units of 910mm = ~16.4m
+    paperSize: 'A4',
+    canvasWidthMm: 29700, // A4 standard: 29.7m x 21.0m @ 1:100
+    canvasHeightMm: 21000,
     scale: 100, // 1:100 standard architectural scale
     gridModuleMm: 910, // 尺モジュール (標準910mm)
     subDivisions: 2, // 455mm sub-grid

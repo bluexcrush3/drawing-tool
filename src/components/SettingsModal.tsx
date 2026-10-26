@@ -1,7 +1,7 @@
 import React from 'react';
-import { X, Sliders, Monitor, Grid, Ruler, PenTool, Check, RotateCcw } from 'lucide-react';
-import type { PenPreset, Settings, TabletPreset } from '../types/drawing';
-import { TABLET_PRESETS, DEFAULT_SETTINGS, DEFAULT_PEN_PRESETS } from '../constants/defaultSettings';
+import { X, Sliders, Monitor, Grid, Ruler, PenTool, Check, RotateCcw, FileText } from 'lucide-react';
+import type { PenPreset, Settings, TabletPreset, PaperSize } from '../types/drawing';
+import { TABLET_PRESETS, DEFAULT_SETTINGS, DEFAULT_PEN_PRESETS, PAPER_PRESETS } from '../constants/defaultSettings';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -21,6 +21,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setPenPresets,
 }) => {
     if (!isOpen) return null;
+
+    const handlePaperSizeChange = (paperSize: PaperSize) => {
+        const info = PAPER_PRESETS[paperSize];
+        setSettings((prev) => ({
+            ...prev,
+            paperSize,
+            canvasWidthMm: info.sheetWidthMm,
+            canvasHeightMm: info.sheetHeightMm,
+        }));
+    };
 
     const handleTabletPresetChange = (preset: TabletPreset) => {
         const info = TABLET_PRESETS[preset];
@@ -74,6 +84,33 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 {/* Modal Body */}
                 <div className="modal-body">
+                    {/* SECTION: 用紙サイズ選択 (A4 / A3) */}
+                    <div className="settings-section">
+                        <div className="section-head">
+                            <FileText size={18} />
+                            <h3>図面用紙サイズ (規格選択)</h3>
+                        </div>
+                        <div className="preset-radio-grid">
+                            {(['A4', 'A3'] as PaperSize[]).map((key) => {
+                                const info = PAPER_PRESETS[key];
+                                const isSelected = settings.paperSize === key;
+                                return (
+                                    <div
+                                        key={key}
+                                        className={`setting-choice-card ${isSelected ? 'selected' : ''}`}
+                                        onClick={() => handlePaperSizeChange(key)}
+                                    >
+                                        <div className="card-top-row">
+                                            <span className="choice-name">{info.name}</span>
+                                            {isSelected && <Check size={16} className="check-mark" />}
+                                        </div>
+                                        <span className="choice-desc">{info.description}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
                     {/* SECTION 1: タブレット・キャンバス端末サイズ */}
                     <div className="settings-section">
                         <div className="section-head">

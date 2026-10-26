@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDrawingState } from './hooks/useDrawingState';
 import { HeaderBar } from './components/HeaderBar';
+import { PageTabBar } from './components/PageTabBar';
 import { LayerBar } from './components/LayerBar';
 import { ToolDock } from './components/ToolDock';
 import { CanvasViewport } from './components/CanvasViewport';
@@ -210,6 +211,19 @@ export function App() {
         onOpenFile={() => fileInputRef.current?.click()}
       />
 
+      {/* Multi-Page Sheet Tabs & Paper Size Switcher */}
+      <PageTabBar
+        pages={drawingState.pages}
+        activePageId={drawingState.activePageId}
+        onSelectPage={drawingState.switchPage}
+        onAddPage={drawingState.addPage}
+        onRemovePage={drawingState.removePage}
+        onDuplicatePage={drawingState.duplicatePage}
+        onRenamePage={drawingState.renamePage}
+        currentPaperSize={drawingState.settings.paperSize}
+        onSelectPaperSize={drawingState.setPaperSize}
+      />
+
       {/* Prominent Layer Switcher Bar right below Header */}
       <LayerBar
         activeLayer={drawingState.activeLayer}
@@ -248,6 +262,9 @@ export function App() {
             onAddCadElement={drawingState.addCadElement}
             onUpdateCadElement={drawingState.updateCadElement}
             onRemoveCadElement={drawingState.removeCadElement}
+            onUpdateMultipleCadElements={drawingState.updateMultipleCadElements}
+            onUpdateMultipleStrokes={drawingState.updateMultipleStrokes}
+            onRemoveMultipleItems={drawingState.removeMultipleItems}
             onPushHistory={drawingState.pushHistory}
             onSelectLayer={drawingState.setActiveLayer}
             onSelectCadTool={drawingState.setActiveCadTool}

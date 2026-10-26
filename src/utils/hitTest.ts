@@ -135,3 +135,82 @@ export function hitTestHandStroke(
     }
     return null;
 }
+
+export interface BoxRegion {
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+}
+
+// CCW orientation check for line segments intersection
+function ccw(p1: Point, p2: Point, p3: Point): boolean {
+    return (p3.y - p1.y) * (p2.x - p1.x) > (p2.y - p1.y) * (p3.x - p1.x);
+}
+
+function segmentsIntersect(a: Point, b: Point, c: Point, d: Point): boolean {
+    return ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d);
+}
+
+function isSegmentInOrIntersectingBox(p1: Point, p2: Point, box: BoxRegion): boolean {
+    // 1. Either endpoint is inside the box
+    if (
+        (p1.x >= box.minX && p1.x <= box.maxX && p1.y >= box.minY && p1.y <= box.maxY) ||
+        (p2.x >= box.minX && p2.x <= box.maxX && p2.y >= box.minY && p2.y <= box.maxY)
+    ) {
+        return true;
+    }
+
+    // 2. Or segment intersects any of the 4 bounding box edges
+    const pTopLeft: Point = { x: box.minX, y: box.minY };
+    const pTopRight: Point = { x: box.maxX, y: box.minY };
+    const pBottomRight: Point = { x: box.maxX, y: box.maxY };
+    const pBottomLeft: Point = { x: box.minX, y: box.maxY };
+
+    if (segmentsIntersect(p1, p2, pTopLeft, pTopRight)) return true;
+    if (segmentsIntersect(p1, p2, pTopRight, pBottomRight)) return true;
+    if (segmentsIntersect(p1, p2, pBottomRight, pBottomLeft)) return true;
+    if (segmentsIntersect(p1, p2, pBottomLeft, pTopLeft)) return true;
+
+    return false;
+}
+
+export function boxSelectCadElements(box: BoxRegion, cadElements: CADElement[]): CADElement[] {
+    return cadElements.filter((el) => {
+        if (el.type === 'wall' || el.type === 'line' || el.type === 'dimension') {
+            return isSegmentInOrIntersectingBox(el.p1, el.p2, box);
+        } else if (el.type === 'rect') {
+            const minX = Math.min(el.p1.x, el.p2.x);
+            const maxX = Math.max(el.p1.x, el.p2.x);
+            const minY = Math.min(el.p1.y, el.p2.y);
+            const maxY = Math.max(el.p1.y, el.p2.y);
+            return maxX >= box.minX && minX <= box.maxX && maxY >= box.minY && minY <= box.maxY;
+        } else if (el.type === 'fixture') {
+            const halfW = (el.widthMm || 800) / 2;
+            const halfD = (el.depthMm || 800) / 2;
+            return (
+                el.position.x + halfW >= box.minX &&
+                el.position.x - halfW <= box.maxX &&
+                el.position.y + halfD >= box.minY &&
+                el.position.y - halfD <= box.maxY
+            );
+        } else if (el.type === 'room') {
+            return (
+                el.position.x >= box.minX - 400 &&
+                el.position.x <= box.maxX + 400 &&
+                el.position.y >= box.minY - 250 &&
+                el.position.y <= box.maxY + 250
+            );
+        }
+        return false;
+    });
+}
+
+export function boxSelectStrokes(box: BoxRegion, strokes: HandStroke[]): HandStroke[] {
+    return strokes.filter((stroke) => {
+        return stroke.points.some(
+            (p) => p.x >= box.minX && p.x <= box.maxX && p.y >= box.minY && p.y <= box.maxY
+        );
+    });
+}
+

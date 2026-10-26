@@ -20,10 +20,13 @@ export interface PenPreset {
   opacity: number;
 }
 
+export type PaperSize = 'A4' | 'A3';
+
 export interface Settings {
   tabletPreset: TabletPreset;
-  canvasWidthMm: number; // e.g. 18200 (20 x 910mm grids)
-  canvasHeightMm: number; // e.g. 13650 (15 x 910mm grids)
+  paperSize: PaperSize;
+  canvasWidthMm: number; // e.g. 29700 for A4, 42000 for A3
+  canvasHeightMm: number; // e.g. 21000 for A4, 29700 for A3
   scale: number; // e.g. 100 for 1:100, 50 for 1:50
   gridModuleMm: number; // default 910 (尺モジュール) or 1000 (メーターモジュール)
   subDivisions: number; // e.g. 2 -> 455mm or 500mm
@@ -128,6 +131,17 @@ export type CADElement =
   | DimensionElement
   | RoomElement;
 
+export interface DrawingPage {
+  id: string;
+  name: string;
+  paperSize: PaperSize;
+  canvasWidthMm: number;
+  canvasHeightMm: number;
+  cadElements: CADElement[];
+  roughStrokes: HandStroke[];
+  viewport: ViewportTransform;
+}
+
 export interface DrawingProject {
   version: string;
   title: string;
@@ -137,6 +151,8 @@ export interface DrawingProject {
   layerState: LayerState;
   roughStrokes: HandStroke[];
   cadElements: CADElement[];
+  pages?: DrawingPage[];
+  activePageId?: string;
 }
 
 export interface ViewportTransform {
